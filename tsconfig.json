@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "noUnusedParameters": false,
+        "noUnusedLocals": true,
+        "module": "commonjs",
+        "target": "es2017",
+        "noImplicitAny": false,
+        "sourceMap": false,
+        "outDir": "./appJS",
+        "watch": true,
+        "types": [
+            "node"
+        ],
+        "baseUrl": ".", // This must be specified if "paths" is.
+        "paths": {
+          "@webServer/*": ["./app/webServer/*"]
+        }
+    },
+    "include": [
+        "app/**/*.ts"
+    ],
+    "exclude" : [
+        "./appJS",
+        "./node_modules"
+    ]
+}
