@@ -89,7 +89,7 @@ function configureSocketIO(io: SocketIO.Server) {
     const mapSubscriptionsBrickEvents = new Map<string, Subscription>();
 
     obsNewBrick.subscribe( (B: Brick) => {
-        // console.log("emit brickAppears", B.getID());
+        console.log("emit brickAppears", B.getID());
         io.emit("brickAppears", B.toJSON() );
         // Subscribe to brick events
         const subscription = B.obsEvents.subscribe( evt => io.emit( "brickEvent", {

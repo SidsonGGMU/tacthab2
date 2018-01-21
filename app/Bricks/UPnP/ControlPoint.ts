@@ -1,8 +1,9 @@
 import {getControlPoint} from "alx-upnp";
+import {getBrickFromId} from "../Brick";
 import {BrickUPnP} from "./BrickUPnP";
 import {instantiateMediaRenderer} from "./MediaRenderer";
 import {instantiateMediaServer}   from "./MediaServer";
-import {getBrickFromId} from "../Brick";
+import {instantiateHueBridge} from "./HueBridge";
 
 export const CP = getControlPoint();
 // CP.getObsDeviceAppears()
@@ -10,6 +11,7 @@ export const CP = getControlPoint();
 CP  .getObsDeviceAppears()
     .filter( D => !instantiateMediaServer  (D) )
     .filter( D => !instantiateMediaRenderer(D) )
+    .filter( D => !instantiateHueBridge    (D) )
     .forEach( D => new BrickUPnP(D) );
 
 CP  .getObsDeviceDisappears()

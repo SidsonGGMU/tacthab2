@@ -60,6 +60,7 @@ function processLastChange(service: Service, value: string) {
 export class MediaRenderer extends BrickUPnP {
     private serviceAVTransport: Service;
     private serviceRenderingControl: Service;
+    private nextVolumeToSet: number; // used for temporisation
 
     constructor(device: Device) {
         super(device);
@@ -141,12 +142,23 @@ export class MediaRenderer extends BrickUPnP {
         );
     }
 
-    setVolume(volume: number): Promise<CALL_RESULT> {
-        return this.CallRenderingControl("SetVolume", {
-            InstanceID		: 0,
-            Channel			: "Master",
-            DesiredVolume	: Math.min(100, Math.max(0, volume) )
-        });
+    async setVolume(volume: number): Promise<CALL_RESULT> {
+        if (this.nextVolumeToSet === undefined) {
+             const res = await this.CallRenderingControl("SetVolume", {
+                InstanceID: 0,
+                Channel: "Master",
+                DesiredVolume: Math.min(100, Math.max(0, volume))
+             });
+             if (this.nextVolumeToSet !== undefined) {
+                 const v = this.nextVolumeToSet;
+                 this.nextVolumeToSet = undefined;
+                 this.setVolume(v); // XXX To be tested....
+             }
+             return res;
+        } else {
+            this.nextVolumeToSet = volume;
+            return Promise.resolve({raw: "", out: {volume}});
+        }
     }
 
     async loadMedia(mediaServerId: string, itemId: string): Promise<CALL_RESULT> {

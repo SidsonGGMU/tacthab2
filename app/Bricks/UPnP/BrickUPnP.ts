@@ -40,6 +40,7 @@ export class BrickUPnP extends Brick {
         this.subscriptions.forEach(
             S => S.unsubscribe()
         );
+        super.dispose();
     }
 
     call(C: CALL): Promise<CALL_RESULT> {
