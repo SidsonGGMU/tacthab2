@@ -3,6 +3,7 @@ import * as request from "request-promise-native";
 import {BrickUPnP, BrickUPnPJSON} from "./BrickUPnP";
 import {Device} from "alx-upnp";
 import {HueLamp, LAMP_JSON, LAMP_STATE, LAMP_STATE_SETTER} from "./HueLamp";
+import {loadConfig, saveConfig} from "../Configurator"
 
 export class HueBridge extends BrickUPnP {
     lamps: {
@@ -25,7 +26,8 @@ export class HueBridge extends BrickUPnP {
     }
 
     async connect() {
-        const user = "18b3c6ee1080cee75cbc20228cff50b";
+        const bridgeConfigId = `HueBridge::${this.device.getUSN()}`;
+        const user = this.userName = loadConfig(bridgeConfigId) || "TActHab2"; // Labo: "17fc1f8aa71c51736c57f611b25033" Maison: "18b3c6ee1080cee75cbc20228cff50b";
         const baseURL = this.device.toJSON().baseURL;
         try {
             const res = await request.get(`${baseURL}/api/${user}`);
@@ -52,6 +54,7 @@ export class HueBridge extends BrickUPnP {
                 if (resIdentify && resIdentify.success) {
                     console.log("Connected to Hue bridge !", resIdentify.success);
                     // { success: { username: '18b3c6ee1080cee75cbc20228cff50b' } }
+                    saveConfig(bridgeConfigId, resIdentify.success.username);
                     this.setUserName( resIdentify.success.username );
                     this.authorizedConnection = true;
                 }
@@ -105,15 +108,19 @@ export class HueBridge extends BrickUPnP {
     }
 
     updateLamps() {
-        request.get(`${this.baseURL}/api/${this.userName}/lights`).then( str => {
+        const adress = `${this.baseURL}/api/${this.userName}/lights`;
+        // console.log("updateLamps from", adress);
+        request.get(adress).then( str => {
             const objRes = JSON.parse(str);
+            // console.log("updateLamps => ", objRes);
             for (let idLamp in objRes) {
+                // console.log("Update lamp", idLamp, "/", this.lamps);
                 const lamp = this.lamps[idLamp];
                 lamp.updateStateFromState( objRes[idLamp].state as LAMP_STATE );
             }
             setTimeout( () => this.updateLamps(), this.dtUpdateStateFromBridge);
         }).catch( err => {
-            console.error("Error getting lamps state from HueBridge");
+            console.error("Error getting lamps state from HueBridge", err);
         });
     }
 

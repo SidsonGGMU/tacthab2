@@ -4,6 +4,6 @@ export interface PassportUser {
     token: any;
     emails: string[];
     photos: string[];
-    provider: "google";
+    provider: "google" | "firebase";
     gender: "male" | "female";
 }

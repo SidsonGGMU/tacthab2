@@ -31,9 +31,8 @@ export class HueLamp extends Brick {
     async setState(state: LAMP_STATE_SETTER) {
         // send command to the bridge
         const delta: [string, any][] = await this.bridge.setLampState(this, state);
-        delta.forEach( ([k, v]) => this.data.state[k] = v );
-        // console.log("setState =>", this.data.state);
-        return delta;
+        // delta.forEach( ([k, v]) => this.data.state[k] = v );
+        return this.updateStateFromDelta(delta);
     }
 
     updateStateFromState(newState: LAMP_STATE) {
@@ -44,7 +43,7 @@ export class HueLamp extends Brick {
         this.updateStateFromDelta(delta);
     }
 
-    updateStateFromDelta(delta: [string, any][]) {
+    updateStateFromDelta(delta: [string, any][]): [string, any][] {
         const modifications = delta.filter(([k, v]) => {
             if (v.constructor === Array) {
                 return v.reduce( (acc, value, i) => acc || value !== this.data.state[k][i], false);
@@ -53,9 +52,14 @@ export class HueLamp extends Brick {
             }
         });
         modifications.forEach( ([k, v]) => this.data.state[k] = v );
-        /*if (modifications.length) {
-            console.log(this.getLampId(), "updateState =>", modifications);
-        }*/
+        if (modifications.length) {
+            // console.log("emit state", modifications);
+            this.subjectEvents.next({
+                attribute: "state",
+                data: modifications
+            });
+        }
+        return modifications
     }
 
     toJSON(): LAMP_JSON {
@@ -74,7 +78,7 @@ export interface LAMP_STATE {
     ct: number; // 0,
     alert: string; // 'none',
     colormode: "hs" | "xy"; // 'hs',
-    reachable: boolean; //false
+    reachable: boolean; // false
 }
 
 export interface LAMP_STATE_SETTER {

@@ -43,7 +43,7 @@ export abstract class Brick {
     constructor(config: BRICK_CONFIG) {
         this.id = config.id || getUID.next().value;
         this.name = config.name || this.id;
-        this.types.push["Brick"];
+        this.types.push("Brick");
         this.obsEvents = this.subjectEvents.asObservable();
         if (mapBrick.has(this.id)) {
             throw {message: `Brick ID already in use`, brickId: this.id};

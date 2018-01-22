@@ -3,12 +3,16 @@ import {initOAuthGoogle} from "./OAuthGoogle";
 import {Application} from "express";
 import * as passport from "passport";
 import {PassportUser} from "./PassportUser";
+import {initOAuthFirebase} from "./OAuthFirebase";
 
 
 export function RegisterOAuth(app: Application, urlPrefix: string = "") {
     app.use(initOAuthGoogle({
         GOOGLE_CLIENT_ID    : "150032486069-n9lbjqif9ucmu84bmc00jcm70hfiat0u.apps.googleusercontent.com",
         GOOGLE_CLIENT_SECRET: "u64PkUyI8cdYufa3Fsi8Id_q",
+        urlPrefix           : urlPrefix
+    }));
+    app.use( initOAuthFirebase({
         urlPrefix           : urlPrefix
     }));
     passport.serializeUser( (user: PassportUser, done) => {
