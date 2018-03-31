@@ -2,16 +2,19 @@ import * as ioClient from "socket.io-client";
 import * as uuid from "uuid";
 import * as request from "request";
 import {Brick} from "../Brick";
-import {BehaviorSubject, Subject} from "@reactivex/rxjs";
+import {BehaviorSubject, Subject, Observable} from "@reactivex/rxjs";
 
 const socketBus_uuid = uuid.v4();
 let external_IP_v4 = "";
 
 export interface SocketBusInterface {
     connect(host: string, login: string, pass: string);
+    getObsConnected(): Observable<boolean>;
+    getObsMessage(): Observable<SocketBusData>;
+    send(title: string, message: string);
 }
 
-type SocketBusData = {
+export type SocketBusData = {
     title: string;
     message: any;
 };
@@ -24,14 +27,31 @@ class SocketBus extends Brick implements SocketBusInterface {
     private subjConnected = new BehaviorSubject<boolean>( false );
     private subjMessage   = new Subject<SocketBusData>();
 
-    obsConnected = this.subjConnected.asObservable();
-    obsMessage   = this.subjMessage.asObservable();
+    private obsConnected = this.subjConnected.asObservable();
+    private obsMessage   = this.subjMessage.asObservable();
 
     constructor(id: string) {
         super( {id, name: "SocketBus on TActHab 2"} );
     }
 
-    connect(host: string, login: string, pass: string) {
+    getObsConnected(): Observable<boolean> {
+        return this.obsConnected;
+    }
+
+    getObsMessage(): Observable<SocketBusData> {
+        return this.obsMessage;
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            connected: this.subjConnected.getValue(),
+            host: this.host,
+            login: this.login
+        };
+    }
+
+    connect(host: string, login: string, pass: string): Observable<boolean> {
         this.host   = host;
         this.login  = login;
         this.pass   = pass;
@@ -79,6 +99,7 @@ class SocketBus extends Brick implements SocketBusInterface {
                 }
             });
         });
+        return this.subjConnected.asObservable();
     } // End of connect
 
     send(title: string, message: string) {

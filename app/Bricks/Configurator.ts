@@ -12,7 +12,7 @@ export function loadConfig(key: string): any {
     return mapConfig.get(key);
 }
 
-const configPath = path.join(__dirname, "../../configurations")
+const configPath = path.join(__dirname, "../../configurations");
 async function saveToFile(fName: string = "./config.json"): Promise<any> {
     const config = {};
     const pathConfig = path.join(configPath, fName);

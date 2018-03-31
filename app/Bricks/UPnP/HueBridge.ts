@@ -3,7 +3,7 @@ import * as request from "request-promise-native";
 import {BrickUPnP, BrickUPnPJSON} from "./BrickUPnP";
 import {Device} from "alx-upnp";
 import {HueLamp, LAMP_JSON, LAMP_STATE, LAMP_STATE_SETTER} from "./HueLamp";
-import {loadConfig, saveConfig} from "../Configurator"
+import {loadConfig, saveConfig} from "../Configurator";
 
 export class HueBridge extends BrickUPnP {
     lamps: {
@@ -40,7 +40,7 @@ export class HueBridge extends BrickUPnP {
                 const [resIdentify] = await request.post({
                     url: `${baseURL}/api`, // self.prefixHTTP + '/api',
                     method: "POST",
-                    body: '{"devicetype":"TActHabv2#server"}'
+                    body: `{"devicetype":"TActHabv2#server"}`
                 }).then( data => JSON.parse( data ) );
                 console.log("HueBridge identification:", resIdentify);
                 if (resIdentify.error) {
@@ -155,7 +155,7 @@ type STATE_RES = {
     success?: {
         [key: string]: any
     }
-}
+};
 
 export function instantiateHueBridge(device: Device): boolean {
     if (device.toJSON().modelDescription.indexOf("Philips hue") >= 0) {
@@ -190,7 +190,7 @@ export interface HUE_BRIDGE_DESCRIPTION {
     };
     swversion: string; // '01023599',
     apiversion: string; // '1.7.0',
-    swupdate:{
+    swupdate: {
         updatestate: number; // 2,
         checkforupdate: boolean; // false,
         devicetypes: any[]; // [Object],

@@ -59,7 +59,7 @@ export class HueLamp extends Brick {
                 data: modifications
             });
         }
-        return modifications
+        return modifications;
     }
 
     toJSON(): LAMP_JSON {
