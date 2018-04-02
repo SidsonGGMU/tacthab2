@@ -3,15 +3,20 @@ import {BehaviorSubject, Observable} from "@reactivex/rxjs";
 import {BridgeState} from "./BLE.data";
 import {BrickBLE} from "./BLE";
 import {createBLEBrick} from "./Factory";
+import {Brick} from "../Brick";
+import {BridgeInterface} from "./Bridge.interface";
 
-export class BLEBridge {
+export class BLEBridge extends Brick implements BridgeInterface {
     private isConnected = new BehaviorSubject<boolean>(false);
     private socket;
     private BLEBricks: BrickBLE[] = [];
 
-    constructor( config: {host: string, port: string} ) {
+    constructor( config: {name: string, id?: string, host: string, port: string} ) {
+        super({name: config.name, id: config.id});
+        this.types.push( "BLEBridge" );
+
         const {host, port} = config;
-        this.socket = io.connect({host, port});
+        this.socket = io.connect( `http://${host}:${port}` ); // ({host, port});
         this.socket.on("connect", () => this.isConnected.next(true) );
         this.socket.on("disconnect", () => this.isConnected.next(false) );
 
@@ -64,7 +69,7 @@ export class BLEBridge {
         return {
             connected: this.isConnected.getValue(),
             obs: this.isConnected.asObservable()
-        }
+        };
     }
 
     call(c: {deviceId: string, method: string, arguments: any[]}) {
@@ -76,3 +81,4 @@ export class BLEBridge {
     }
 
 }
+

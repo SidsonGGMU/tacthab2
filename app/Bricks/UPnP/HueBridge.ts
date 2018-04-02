@@ -2,7 +2,7 @@
 import * as request from "request-promise-native";
 import {BrickUPnP, BrickUPnPJSON} from "./BrickUPnP";
 import {Device} from "alx-upnp";
-import {HueLamp, LAMP_JSON, LAMP_STATE, LAMP_STATE_SETTER} from "./HueLamp";
+import {HueLamp, LampJson, LampState, LampStateSetter} from "./HueLamp";
 import {loadConfig, saveConfig} from "../Configurator";
 
 export class HueBridge extends BrickUPnP {
@@ -15,7 +15,7 @@ export class HueBridge extends BrickUPnP {
     private timerUpdate: any;
     private baseURL: string;
     private userName: string = "18b3c6ee1080cee75cbc20228cff50b";
-    private description: HUE_BRIDGE_DESCRIPTION;
+    private description: HueBridgeDescription;
     private dtUpdateStateFromBridge = 1000;
 
     constructor(protected device: Device) {
@@ -77,11 +77,11 @@ export class HueBridge extends BrickUPnP {
         clearTimeout( this.timerUpdate );
     }
 
-    toJSON(): HUE_BRIDGE_JSON {
+    toJSON(): HueBridgeJson {
         return {...super.toJSON(), ...this.description};
     }
 
-    initLamps(description: HUE_BRIDGE_DESCRIPTION) {
+    initLamps(description: HueBridgeDescription) {
         this.description = description;
         for (let id in description.lights) {
             const descr = description.lights[id];
@@ -116,7 +116,7 @@ export class HueBridge extends BrickUPnP {
             for (let idLamp in objRes) {
                 // console.log("Update lamp", idLamp, "/", this.lamps);
                 const lamp = this.lamps[idLamp];
-                lamp.updateStateFromState( objRes[idLamp].state as LAMP_STATE );
+                lamp.updateStateFromState( objRes[idLamp].state as LampState );
             }
             setTimeout( () => this.updateLamps(), this.dtUpdateStateFromBridge);
         }).catch( err => {
@@ -124,7 +124,7 @@ export class HueBridge extends BrickUPnP {
         });
     }
 
-    setLampState(lamp: HueLamp, state: LAMP_STATE_SETTER): Promise<[string, any][]> {
+    setLampState(lamp: HueLamp, state: LampStateSetter): Promise<[string, any][]> {
         // PUT on /api/<username>/lights/<id>/state
         return request({
             uri: `${this.baseURL}/api/${this.userName}/lights/${lamp.getLampId()}/state`,
@@ -166,11 +166,11 @@ export function instantiateHueBridge(device: Device): boolean {
     }
 }
 
-export interface HUE_BRIDGE_JSON extends BrickUPnPJSON, HUE_BRIDGE_DESCRIPTION {}
+export interface HueBridgeJson extends BrickUPnPJSON, HueBridgeDescription {}
 
-export interface HUE_BRIDGE_DESCRIPTION {
+export interface HueBridgeDescription {
     lights: {
-        [key: string]: LAMP_JSON;
+        [key: string]: LampJson;
     };
     groups: any;
     config: {

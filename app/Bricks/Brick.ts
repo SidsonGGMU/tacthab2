@@ -15,9 +15,11 @@ export interface BrickJSON {
 function* genId(): IterableIterator<string> {
     let i = 0;
     while (true) {
-        yield `Brick::${i}`;
+        yield `Brick::${i++}`;
     }
 }
+
+console.log("---> BRICK");
 
 const getUID = genId();
 const mapBrick = new Map<BRICK_ID, Brick>();

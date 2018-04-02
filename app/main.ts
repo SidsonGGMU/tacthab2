@@ -1,8 +1,10 @@
-import {app, /*delSocketObs, newSocketObs,*/ emitOnSocketIO} from "./webServer/webServer";
+import {app, emitOnSocketIO} from "./webServer/webServer";
 import {RegisterTest} from "./test/test";
-import {/*Brick, getBrickFromId, getBricks,*/ obsNewBrick} from "./Bricks/Brick";
+import {obsNewBrick} from "./Bricks/Brick";
 import {CP} from "./Bricks/UPnP/ControlPoint";
 import {socketBus} from "./Bricks/SocketBus/SocketBus";
+import "./Bricks/BLE/MetaWear";
+// import {BLEBridge} from "./Bricks/BLE/Bridge";
 
 CP  .getObsDeviceAppears().subscribe(
     D => console.log("UPnP device", D.getType(), D.getUSN() )
@@ -27,3 +29,11 @@ obsNewBrick.forEach( B => {
 /* SocketBus */
 socketBus.getObsConnected().subscribe( c => emitOnSocketIO("socketBus::connected", c) );
 socketBus.getObsMessage  ().subscribe( m => emitOnSocketIO("socketBus::message"  , m) );
+
+import "./Bricks/BLE/BridgeFactory";
+
+// TEST :
+/*
+const bridge = new BLEBridge({name: "BLE test bridge", host: "192.168.1.28", port: "8880"});
+console.log("Test BLE Bridge:", bridge.toJSON());
+*/

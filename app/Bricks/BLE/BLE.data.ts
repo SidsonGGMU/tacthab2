@@ -1,19 +1,19 @@
 export interface BLECharacteristic {
-    name: string
+    name: string;
     uuid: string;
     type: string;
     properties: string[];
 }
 
 export interface BLEService {
-    name: string
+    name: string;
     uuid: string;
     type: string;
     characteristics: BLECharacteristic[];
 }
 
 export interface BLEDeviceDescription {
-    name: string
+    name: string;
     uuid: string;
     isConnected: boolean;
     deviceType: string;
@@ -28,5 +28,5 @@ export interface BridgeState {
         scanning: boolean;
         err: string;
     };
-    devices: BLEDeviceDescription[]
+    devices: BLEDeviceDescription[];
 }

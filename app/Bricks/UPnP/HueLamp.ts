@@ -3,7 +3,7 @@ import {HueBridge} from "./HueBridge";
 
 export class HueLamp extends Brick {
 
-    constructor(private bridge: HueBridge, private lampId: string, private data: LAMP_DESCRIPTION) {
+    constructor(private bridge: HueBridge, private lampId: string, private data: LampDescription) {
         super({name: data.name, id: data.uniqueid});
         this.types.push("HueLamp");
     }
@@ -28,14 +28,14 @@ export class HueLamp extends Brick {
         return this.data.state.on;
     }
 
-    async setState(state: LAMP_STATE_SETTER) {
+    async setState(state: LampStateSetter) {
         // send command to the bridge
         const delta: [string, any][] = await this.bridge.setLampState(this, state);
         // delta.forEach( ([k, v]) => this.data.state[k] = v );
         return this.updateStateFromDelta(delta);
     }
 
-    updateStateFromState(newState: LAMP_STATE) {
+    updateStateFromState(newState: LampState) {
         const delta = [];
         for (let k in newState) {
             delta.push( [k, newState[k]] );
@@ -62,13 +62,13 @@ export class HueLamp extends Brick {
         return modifications;
     }
 
-    toJSON(): LAMP_JSON {
+    toJSON(): LampJson {
         return {...super.toJSON(), ...this.data};
     }
 
 }
 
-export interface LAMP_STATE {
+export interface LampState {
     on: boolean;
     bri: number; // 1 to 254
     hue: number; // 0 to 65535(red) 25500(green) 46920(blue)
@@ -81,7 +81,7 @@ export interface LAMP_STATE {
     reachable: boolean; // false
 }
 
-export interface LAMP_STATE_SETTER {
+export interface LampStateSetter {
     on?: boolean;
     bri?: number; // 1 to 254
     hue?: number; // 0 to 65535(red) 25500(green) 46920(blue)
@@ -93,8 +93,8 @@ export interface LAMP_STATE_SETTER {
     transitiontime?: number; // in x100ms, default: 4
 }
 
-export interface LAMP_DESCRIPTION {
-    state: LAMP_STATE;
+export interface LampDescription {
+    state: LampState;
     type: string; // 'Extended color light',
     name: string; // 'MK1',
     modelid: string; // 'LCT001',
@@ -104,4 +104,4 @@ export interface LAMP_DESCRIPTION {
     pointsymbol: any; // voir [Object],
 }
 
-export interface LAMP_JSON extends LAMP_DESCRIPTION, BrickJSON {}
+export interface LampJson extends LampDescription, BrickJSON {}

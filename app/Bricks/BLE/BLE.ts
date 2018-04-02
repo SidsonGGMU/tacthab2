@@ -1,12 +1,15 @@
 import {Brick} from "../Brick";
 import {BLEDeviceDescription} from "./BLE.data";
-import {BLEBridge} from "./Bridge";
+import {BridgeInterface} from "./Bridge.interface";
 
 
 export abstract class BrickBLE extends Brick {
 
-    constructor(private bridge: BLEBridge, protected deviceDescription: BLEDeviceDescription) {
-        super({name: deviceDescription.name || deviceDescription.uuid});
+    constructor(private bridge: BridgeInterface, protected deviceDescription: BLEDeviceDescription) {
+        super({
+            name: deviceDescription.name || deviceDescription.uuid,
+            id: deviceDescription.uuid
+        });
         this.types.push("BLE");
     }
 
@@ -52,4 +55,10 @@ export abstract class BrickBLE extends Brick {
         return this.deviceDescription.isConnected;
     }
 
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            BLE: this.deviceDescription
+        };
+    }
 }

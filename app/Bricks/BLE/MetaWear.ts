@@ -1,13 +1,13 @@
 import {BrickBLE} from "./BLE";
 import {BLEDeviceDescription} from "./BLE.data";
-import {BLEBridge} from "./Bridge";
 import {registerFactory} from "./Factory";
+import {BridgeInterface} from "./Bridge.interface";
 
 export type SENSOR = "accelerometer" | "gyroscope";
 
 export class MetaWear extends BrickBLE {
 
-    constructor(bridge: BLEBridge, deviceDescription: BLEDeviceDescription) {
+    constructor(bridge: BridgeInterface, deviceDescription: BLEDeviceDescription) {
         super(bridge, deviceDescription);
         this.types.push("METAWEAR");
     }
