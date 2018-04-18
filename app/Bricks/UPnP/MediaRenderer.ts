@@ -73,40 +73,44 @@ export class MediaRenderer extends BrickUPnP {
 
 
         // Subscribe to events of AVTransport LastChange to update other variables
-        this.serviceAVTransport
-            .stateVariables.get("LastChange").getObservable().filter(v => v !== "").forEach(
-            value => processLastChange(this.serviceAVTransport, value)
-        );
+        if (this.serviceAVTransport) {
+            this.serviceAVTransport
+                .stateVariables.get("LastChange").getObservable().filter(v => v !== "").forEach(
+                value => processLastChange(this.serviceAVTransport, value)
+            );
+            // Subscribe to state variables updates
+            this.serviceAVTransport.stateVariables.forEach(
+                SV => SV.getObservable().forEach(
+                    value => this.subjectEvents.next( {
+                        attribute: "AVTransport",
+                        data: {
+                            stateVariable: SV.getName(),
+                            value: value
+                        }
+                    })
+                )
+            );
+        }
 
         // Subscribe to events of RenderingControl
-        this.serviceRenderingControl
-            .stateVariables.get("LastChange").getObservable().filter(v => v !== "").forEach(
-            value => processLastChange(this.serviceRenderingControl, value)
-        );
+        if (this.serviceRenderingControl) {
+            this.serviceRenderingControl
+                .stateVariables.get("LastChange").getObservable().filter(v => v !== "").forEach(
+                value => processLastChange(this.serviceRenderingControl, value)
+            );
+            this.serviceRenderingControl.stateVariables.forEach(
+                SV => SV.getObservable().forEach(
+                    value => this.subjectEvents.next( {
+                        attribute: "RenderingControl",
+                        data: {
+                            stateVariable: SV.getName(),
+                            value: value
+                        }
+                    })
+                )
+            );
+        }
 
-        // Subscribe to state variables updates
-        this.serviceAVTransport.stateVariables.forEach(
-            SV => SV.getObservable().forEach(
-                value => this.subjectEvents.next( {
-                    attribute: "AVTransport",
-                    data: {
-                        stateVariable: SV.getName(),
-                        value: value
-                    }
-                })
-            )
-        );
-        this.serviceRenderingControl.stateVariables.forEach(
-            SV => SV.getObservable().forEach(
-                value => this.subjectEvents.next( {
-                    attribute: "RenderingControl",
-                    data: {
-                        stateVariable: SV.getName(),
-                        value: value
-                    }
-                })
-            )
-        );
     }
 
     play(): Promise<CALL_RESULT> {

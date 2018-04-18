@@ -1,11 +1,34 @@
-import {Brick, BrickJSON} from "../Brick";
+import {Brick, BrickEvent, BrickJSON} from "../Brick";
 import {HueBridge} from "./HueBridge";
+import {Observable} from "@reactivex/rxjs";
+import {BrickChannel} from "../CCBL/CcblDataStructures";
+import {getHSLColor} from "./HueColors";
+
+export type ChannelState = string;
 
 export class HueLamp extends Brick {
+    private obsState: Observable<ChannelState>;
+    private hueColor: string;
 
     constructor(private bridge: HueBridge, private lampId: string, private data: LampDescription) {
         super({name: data.name, id: data.uniqueid});
         this.types.push("HueLamp");
+
+        // Configure observable for Hue state
+        this.obsState = this.getObservableEvents()
+                            .filter( (evt: BrickEvent) => evt.attribute === "state" )
+                            .map( () => this.getLampState() );
+
+        // Configure setter for Hue state
+        const channelState = new BrickChannel<ChannelState>({
+            emitterName: "state",
+            type: "off | colorName | hsl(0-365, 0-100%, 0-100%)",
+            initialAccessor: () => this.getLampState(),
+            obsUpdate: this.obsState,
+            fctBrickUpdate: (value: ChannelState) => this.setLampState(value)
+        });
+
+        this.brickChannels.set( channelState.emitterName, channelState);
     }
 
     isReachable(): boolean {
@@ -26,6 +49,32 @@ export class HueLamp extends Brick {
 
     isOn(): boolean {
         return this.data.state.on;
+    }
+
+    getLampState(): ChannelState {
+        if (this.isOn()) {
+            const hue = Math.round( this.data.state.hue / 65565 * 365 );
+            const sat = Math.round( this.data.state.sat / 255   * 100 );
+            const bri = Math.round( this.data.state.bri / 255   * 100 );
+            this.hueColor = this.hueColor || `hsl(${hue}, ${sat}%, ${bri}%)`;
+            return this.hueColor ;
+        } else {
+            return "off";
+        }
+    }
+
+    async setLampState(state: ChannelState) {
+        if (state === "off") {
+        } else {
+            const {hue, sat, bri} = getHSLColor(state);
+            this.hueColor = state;
+            return this.setState( {
+                on: true,
+                bri: bri *   255 / 100,
+                sat: sat *   255 / 100,
+                hue: hue * 65535 / 365
+            } );
+        }
     }
 
     async setState(state: LampStateSetter) {
@@ -65,6 +114,7 @@ export class HueLamp extends Brick {
     toJSON(): LampJson {
         return {...super.toJSON(), ...this.data};
     }
+
 
 }
 

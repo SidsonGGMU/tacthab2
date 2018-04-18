@@ -1,4 +1,5 @@
 import {Subject, Observable} from "@reactivex/rxjs";
+import {BrickChannel, BrickEmitter, BrickEmitterJSON} from "./CCBL/CcblDataStructures";
 
 export type BRICK_ID = string;
 export type BRICK_CONFIG = {
@@ -10,6 +11,8 @@ export interface BrickJSON {
     id: BRICK_ID;
     name: string;
     types: string[];
+    emitters: BrickEmitterJSON[];
+    channels: BrickEmitterJSON[];
 }
 
 function* genId(): IterableIterator<string> {
@@ -28,16 +31,21 @@ const subjectNewBrick = new Subject<Brick>();
 export const obsNewBrick: Observable<Brick> = subjectNewBrick.asObservable();
 
 const subjectDisposeBrick = new Subject<Brick>();
-export const obsDisposerick: Observable<Brick> = subjectDisposeBrick.asObservable();
+export const obsDisposeBrick: Observable<Brick> = subjectDisposeBrick.asObservable();
 
-type BrickEvent = {
+export type BrickEvent = {
     attribute: string,
     data: any
 };
 
 export abstract class Brick {
     obsEvents: Observable<BrickEvent>;
+
     protected types: string[] = [];
+
+    protected brickEmitters = new Map<string, BrickEmitter<any>>();
+    protected brickChannels = new Map<string, BrickChannel<any>>();
+
     protected subjectEvents = new Subject<BrickEvent>();
     private id: string;
     private name: string;
@@ -57,6 +65,8 @@ export abstract class Brick {
 
     dispose() {
         mapBrick.delete(this.id);
+        this.brickEmitters.forEach( BE => BE.activate(false) );
+        this.brickChannels.forEach( CE => CE.activate(false) );
         setTimeout( () => subjectDisposeBrick.next(this), 1);
     }
 
@@ -64,7 +74,9 @@ export abstract class Brick {
         return {
             name: this.getName(),
             id: this.getID(),
-            types: this.types
+            types: this.types,
+            emitters: [...this.brickEmitters.values()].map( B => B.toJSON() ),
+            channels: [...this.brickChannels.values()].map( C => C.toJSON() )
         };
     }
 
@@ -83,6 +95,15 @@ export abstract class Brick {
     getTypes(): string[] {
         return this.types;
     }
+
+    getObservableEvents(): Observable<BrickEvent> {
+        return this.obsEvents;
+    }
+
+    getBrickEmitter(name: string): BrickEmitter<any> {
+        return this.brickEmitters.get(name);
+    }
+
 }
 
 export function getBrickFromId(id: string): Brick {

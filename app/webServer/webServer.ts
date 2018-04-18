@@ -10,7 +10,7 @@ import * as session from "express-session";     // Session manager
 import * as fs from "fs-extra";                 // Acces to files
 import {Subject, Subscription} from "@reactivex/rxjs";
 import {RegisterOAuth, checkIsAuthentified, getUserFromId} from "./OAuth";
-import {Brick, getBrickFromId, getBricks, obsDisposerick, obsNewBrick} from "../Bricks/Brick";
+import {Brick, getBrickFromId, getBricks, obsDisposeBrick, obsNewBrick} from "../Bricks/Brick";
 
 export const app: express.Application = express();
 
@@ -99,7 +99,7 @@ function configureSocketIO(io: SocketIO.Server) {
         mapSubscriptionsBrickEvents.set(B.getID(), subscription);
     });
 
-    obsDisposerick.subscribe( B => {
+    obsDisposeBrick.subscribe(B => {
         const subscr = mapSubscriptionsBrickEvents.get(B.getID());
         subscr.unsubscribe();
         mapSubscriptionsBrickEvents.delete(B.getID());

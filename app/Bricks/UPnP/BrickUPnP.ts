@@ -61,9 +61,7 @@ export class BrickUPnP extends Brick {
 
     toJSON(): BrickUPnPJSON {
         return {
-            name: this.getName(),
-            id: this.getID(),
-            types: this.types,
+            ...super.toJSON(),
             deviceUPnP: this.device.toJSON()
         };
     }
