@@ -11,6 +11,7 @@ import * as fs from "fs-extra";                 // Acces to files
 import {Subject, Subscription} from "@reactivex/rxjs";
 import {RegisterOAuth, checkIsAuthentified, getUserFromId} from "./OAuth";
 import {Brick, getBrickFromId, getBricks, obsDisposeBrick, obsNewBrick} from "../Bricks/Brick";
+import {BrickSimulator, InitialDescription} from "../Bricks/Simulator/BrickSimulator";
 
 export const app: express.Application = express();
 
@@ -139,7 +140,19 @@ function configureSocketIO(io: SocketIO.Server) {
             socket.disconnect();
         }
     });
+
+    // Configure simulator channel/room
+    const nspSim = io.of("simulator");
+    nspSim.on("connection", socket => {
+        // Crate a dedicated brick here.
+
+        socket.on("initialDescription", (initialDescription: InitialDescription) => {
+            const brickSim = new BrickSimulator(socket, initialDescription);
+            console.log("new simulator", brickSim);
+        });
+    });
 }
+
 const ioHTTP  = socketIO(serverHTTP );
 const ioHTTPS = socketIO(serverHTTPS);
 configureSocketIO(ioHTTP );

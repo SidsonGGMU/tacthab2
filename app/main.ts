@@ -3,7 +3,9 @@ import {RegisterTest} from "./test/test";
 import {obsNewBrick} from "./Bricks/Brick";
 import {CP} from "./Bricks/UPnP/ControlPoint";
 import {socketBus} from "./Bricks/SocketBus/SocketBus";
+import "./Bricks/CCBL/CcblRoot";
 import "./Bricks/BLE/MetaWear";
+import "./Bricks/Pipo/Pipo";
 // import {BLEBridge} from "./Bricks/BLE/Bridge";
 
 CP  .getObsDeviceAppears().subscribe(
@@ -37,3 +39,5 @@ import "./Bricks/BLE/BridgeFactory";
 const bridge = new BLEBridge({name: "BLE test bridge", host: "192.168.1.28", port: "8880"});
 console.log("Test BLE Bridge:", bridge.toJSON());
 */
+import {connect} from "./dataBase/mongo";
+connect();

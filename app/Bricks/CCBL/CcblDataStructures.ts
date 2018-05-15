@@ -68,7 +68,11 @@ export class BrickEmitter<T> {
                 this.emitter.emit(this.initialAccessor());
             }
             this.subscriptionToEmitter = this.obsUpdate.subscribe(
-                value => this.emitter.emit(value)
+                value => {
+                    if (this.emitter.get() !== value) {
+                        this.emitter.emit(value);
+                    }
+                }
             );
         }
         return this;

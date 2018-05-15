@@ -1,5 +1,4 @@
 import * as passport from "passport";
-// import {OAuth2Strategy as GoogleStrategy} from "passport-google-oauth";
 import {Router} from "express";
 import {PassportUser} from "./PassportUser";
 import * as firebase from "firebase";
@@ -15,6 +14,8 @@ const firebaseApp: firebase.app.App = firebase.initializeApp({
 });
 
 console.log(firebaseApp ? "Firebase application initialized" : "Problem with firebase initialisation");
+console.log("FireBase is deprecated for NodeJS...");
+
 
 export function initOAuthFirebase(config: {urlPrefix: string}): Router {
     const routerFirebasePassport: Router = Router();

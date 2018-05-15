@@ -104,6 +104,10 @@ export abstract class Brick {
         return this.brickEmitters.get(name);
     }
 
+    getBrickChannel(name: string): BrickChannel<any> {
+        return this.brickChannels.get(name);
+    }
+
 }
 
 export function getBrickFromId(id: string): Brick {
