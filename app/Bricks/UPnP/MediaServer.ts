@@ -43,7 +43,7 @@ export class MediaServer extends BrickUPnP {
             res => {
                 const {/*doc,*/ containers, items} = this.extractContainersAndItems( res.out["Result"] );
                 console.log("Browse", itemId, flag);
-                console.log(BrowseFlag.BrowseMetadata, BrowseFlag.BrowseDirectChildren);
+                // console.log(BrowseFlag.BrowseMetadata, BrowseFlag.BrowseDirectChildren);
                 switch (flag) {
                     case BrowseFlag.BrowseMetadata:
                         return containers[0] || items[0];

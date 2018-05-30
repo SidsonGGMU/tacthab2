@@ -1,9 +1,9 @@
-import {BrickUPnP} from "./BrickUPnP";
+import {BrickUPnP, BrickUPnPJSON} from "./BrickUPnP";
 // BrickUPnP_MediaServer	= require( './BrickUPnP_MediaServer.js' )
 import * as xmldom from "xmldom";
 import {CALL_RESULT, Device, Service, StateVariable} from "alx-upnp";
 import {getBrickFromId} from "../Brick";
-import {BrowseFlag, MediaServer, UPnP_item} from "./MediaServer";
+import {BrowsDirectChildrenResult, BrowseFlag, MediaServer, UPnP_item} from "./MediaServer";
 
 const xmldomparser = new xmldom.DOMParser();
 
@@ -57,18 +57,21 @@ function processLastChange(service: Service, value: string) {
     }
 }
 
+export interface MediaRendererJSON extends BrickUPnPJSON {
+    upnpItem: UPnP_item;
+}
+
 export class MediaRenderer extends BrickUPnP {
     private serviceAVTransport: Service;
     private serviceRenderingControl: Service;
     private nextVolumeToSet: number; // used for temporisation
+    private upnpItem: UPnP_item;
 
     constructor(device: Device) {
         super(device);
         this.types.push("MediaRenderer");
 
-        // console.log("MediaRenderer =", device.toJSON() );
-
-        this.serviceAVTransport      = device.findServiceFromType( "urn:schemas-upnp-org:service:AVTransport"    );
+        this.serviceAVTransport      = device.findServiceFromType("urn:schemas-upnp-org:service:AVTransport"    );
         this.serviceRenderingControl = device.findServiceFromType("urn:schemas-upnp-org:service:RenderingControl");
 
 
@@ -111,6 +114,13 @@ export class MediaRenderer extends BrickUPnP {
             );
         }
 
+    }
+
+    toJSON(): MediaRendererJSON {
+        return {
+            ...super.toJSON(),
+            upnpItem: this.upnpItem
+        };
     }
 
     play(): Promise<CALL_RESULT> {
@@ -165,12 +175,30 @@ export class MediaRenderer extends BrickUPnP {
         }
     }
 
-    async loadMedia(mediaServerId: string, itemId: string): Promise<CALL_RESULT> {
+    async loadMedia(mediaServerId: string, parentId: string, itemId: string): Promise<CALL_RESULT> {
         console.log("loadMedia", mediaServerId, itemId);
         try {
             const MS = getBrickFromId(mediaServerId) as MediaServer;
             const browseMetadataResult = await MS.Browse(itemId, BrowseFlag.BrowseMetadata) as UPnP_item;
             if (browseMetadataResult.res) {
+                // Get media description
+                if (browseMetadataResult.title === "") {
+                    MS.Browse(parentId, BrowseFlag.BrowseDirectChildren).then((r: BrowsDirectChildrenResult) => {
+                        console.log("loadMedia", itemId, parentId, "=>", r);
+                        const item = r.items.find(i => i.id === itemId);
+                        this.upnpItem = item;
+                        this.subjectEvents.next({
+                            attribute: "upnpItem",
+                            data: this.upnpItem
+                        });
+                    });
+                } else {
+                    this.upnpItem = browseMetadataResult;
+                    this.subjectEvents.next({
+                        attribute: "upnpItem",
+                        data: this.upnpItem
+                    });
+                }
                 return this.loadURI( browseMetadataResult.res.uri, browseMetadataResult );
             } else {
                 throw {message: `No ressource for media item`, itemId};
