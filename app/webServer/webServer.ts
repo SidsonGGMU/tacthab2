@@ -53,8 +53,13 @@ const IdentifiedOrLogin = checkIsAuthentified(401, "/login.html");
 
 // Static files
 const dataPath = path.join(__dirname, "../../data");
-app.use("/data", IdentifiedOrLogin, express.static(dataPath) );
+app.use("/data", /*IdentifiedOrLogin,*/ express.static(dataPath) );
 
+// Static simulator
+const simPath = path.join(__dirname, "../../EnvSim6");
+app.use("/envSimulator", IdentifiedOrLogin, express.static(simPath) );
+
+// Angular client
 const angularClientPath = path.join(__dirname, "../../clientAngular");
 app.get("/login.html", (req, res) => {
     res.sendFile( path.join(__dirname, "../../data/login.html") );
