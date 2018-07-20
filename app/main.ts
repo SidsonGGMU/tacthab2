@@ -33,6 +33,7 @@ socketBus.getObsConnected().subscribe( c => emitOnSocketIO("socketBus::connected
 socketBus.getObsMessage  ().subscribe( m => emitOnSocketIO("socketBus::message"  , m) );
 
 import "./Bricks/BLE/BridgeFactory";
+import "./Bricks/Weather/WeatherFactory";
 
 // TEST :
 /*
